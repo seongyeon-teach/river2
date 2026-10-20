@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강과 습지 동물 수호 탐험대 퀴즈!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gothic+A1:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Gothic A1', sans-serif;
+            background-color: #ecfdf5;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+        }
+        .font-gaegu {
+            font-family: 'Gaegu', cursive;
+        }
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:hover {
+            transform: scale(1.03) translateY(-2px);
+        }
+        .btn-bounce:active {
+            transform: scale(0.97) translateY(2px);
+        }
+        .floating-leaf {
+            position: absolute;
+            bottom: -50px;
+            pointer-events: none;
+            animation: riseLeaf 9s infinite ease-in-out;
+        }
+        @keyframes riseLeaf {
+            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0.6; }
+            50% { transform: translateY(-50vh) rotate(180deg) scale(1.1); opacity: 0.8; }
+            100% { transform: translateY(-100vh) rotate(360deg) scale(0.8); opacity: 0; }
+        }
+        .pulse-slow {
+            animation: pulse 2.2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-emerald-300 via-teal-200 to-cyan-500 text-gray-800 flex flex-col justify-between relative overflow-x-hidden">
+
+    <div id="leaf-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <header class="bg-emerald-800/90 backdrop-blur-md text-white p-4 shadow-xl sticky top-0 z-50 border-b-4 border-emerald-400">
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('start-screen')">
+                <span class="text-3xl sm:text-4xl animate-bounce">🦎</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-wide font-gaegu drop-shadow-md">강과 습지 동물 수호대</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="sound-toggle-btn" onclick="toggleSound()" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 px-4 rounded-full font-bold flex items-center space-x-2 shadow-lg transition border-2 border-white/40">
+                    <i id="sound-icon" class="fas fa-volume-up text-lg"></i>
+                    <span id="sound-text" class="hidden sm:inline text-sm">소리 켜짐</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 sm:p-6 w-full flex-grow flex items-center justify-center relative z-10">
+
+        <section id="start-screen" class="w-full bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-emerald-300 text-center flex flex-col items-center">
+            <div class="inline-block bg-emerald-100 text-emerald-900 text-sm sm:text-base font-extrabold px-4 py-1.5 rounded-full mb-3 shadow-inner">
+                🌿 새로운 탐험가 카드로 푸는 멸종위기 퀴즈!
+            </div>
+            <h2 class="text-3xl sm:text-5xl font-black text-emerald-950 mb-4 leading-tight font-gaegu drop-shadow-sm">
+                강과 습지 동물들은 왜<br><span class="text-amber-600">멸종위기</span>가 되었을까요?
+            </h2>
+            <p class="text-gray-700 sm:text-lg mb-6 max-w-xl font-bold leading-relaxed">
+                5명의 새로운 탐험가 카드(두루미, 양쯔강 돌고래, 투구새우, 저어새, 아홀로틀) 이야기를 듣고,<br>
+                <span class="text-emerald-700 font-extrabold">3지선다 객관식 문제</span>와 <span class="text-blue-700 font-extrabold">O/X 퀴즈</span>를 풀어봐요!
+            </p>
+
+            <!-- 5 Animal Explorer Preview -->
+            <div class="grid grid-cols-5 gap-2 sm:gap-4 mb-8 w-full max-w-2xl">
+                <div class="bg-amber-50 p-2 sm:p-3 rounded-2xl border-2 border-amber-200 flex flex-col items-center shadow-sm">
+                    <span class="text-3xl sm:text-4xl">🦩</span>
+                    <span class="text-xs sm:text-sm font-bold mt-1 text-amber-900">두루미</span>
+                    <span class="text-[10px] text-amber-700">김서연</span>
+                </div>
+                <div class="bg-cyan-50 p-2 sm:p-3 rounded-2xl border-2 border-cyan-200 flex flex-col items-center shadow-sm">
+                    <span class="text-3xl sm:text-4xl">🐬</span>
+                    <span class="text-xs sm:text-sm font-bold mt-1 text-cyan-900">양쯔강돌고래</span>
+                    <span class="text-[10px] text-cyan-700">남기원</span>
+                </div>
+                <div class="bg-emerald-50 p-2 sm:p-3 rounded-2xl border-2 border-emerald-200 flex flex-col items-center shadow-sm">
+                    <span class="text-3xl sm:text-4xl">🦐</span>
+                    <span class="text-xs sm:text-sm font-bold mt-1 text-emerald-900">투구새우</span>
+                    <span class="text-[10px] text-emerald-700">김준</span>
+                </div>
+                <div class="bg-teal-50 p-2 sm:p-3 rounded-2xl border-2 border-teal-200 flex flex-col items-center shadow-sm">
+                    <span class="text-3xl sm:text-4xl">🕊️</span>
+                    <span class="text-xs sm:text-sm font-bold mt-1 text-teal-900">저어새</span>
+                    <span class="text-[10px] text-teal-700">성현수</span>
+                </div>
+                <div class="bg-rose-50 p-2 sm:p-3 rounded-2xl border-2 border-rose-200 flex flex-col items-center shadow-sm">
+                    <span class="text-3xl sm:text-4xl">🦎</span>
+                    <span class="text-xs sm:text-sm font-bold mt-1 text-rose-900">아홀로틀</span>
+                    <span class="text-[10px] text-rose-700">조유나</span>
+                </div>
+            </div>
+
+            <button onclick="startQuiz()" class="btn-bounce bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xl sm:text-2xl font-black py-4 px-10 rounded-full shadow-xl border-b-4 border-teal-800 flex items-center space-x-3 pulse-slow">
+                <span>🔍 탐험 퀴즈 시작하기!</span>
+            </button>
+        </section>
+
+        <section id="quiz-screen" class="hidden w-full bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-2xl border-4 border-emerald-300">
+            <!-- Progress Bar Header -->
+            <div class="mb-5">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="quiz-progress-text" class="font-black text-emerald-950 text-base sm:text-xl">문제 1 / 5</span>
+                    <span id="score-text" class="font-black text-teal-700 text-base sm:text-xl">내 점수: 0점</span>
+                </div>
+                <div class="w-full bg-emerald-100 h-4 rounded-full overflow-hidden p-0.5 border border-emerald-300 shadow-inner">
+                    <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-teal-600 h-full rounded-full transition-all duration-500" style="width: 20%;"></div>
+                </div>
+            </div>
+
+            <!-- Quiz Card Layout -->
+            <div class="bg-emerald-50/80 rounded-2xl p-4 sm:p-6 border-2 border-emerald-200 mb-5 shadow-sm">
+                <!-- Explorer Badge -->
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <div class="flex items-center space-x-2 bg-gradient-to-r from-emerald-700 to-teal-700 text-white px-4 py-1.5 rounded-full shadow-md text-sm sm:text-base font-bold">
+                        <span id="explorer-icon">🧭</span>
+                        <span id="explorer-title">탐험가 카드</span>
+                        <span id="quiz-type-tag" class="ml-2 bg-amber-400 text-amber-950 text-xs px-2.5 py-0.5 rounded-full font-extrabold">3지선다</span>
+                    </div>
+                    <button onclick="readQuestionTTS()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-3.5 py-1.5 rounded-full text-xs sm:text-sm flex items-center space-x-1.5 border border-emerald-300 shadow-sm transition">
+                        <i class="fas fa-volume-up text-emerald-700"></i>
+                        <span>문제 들려주기</span>
+                    </button>
+                </div>
+
+                <!-- Animal Image/SVG & Question -->
+                <div class="flex flex-col md:flex-row items-center gap-4 mb-5 bg-white p-4 sm:p-5 rounded-2xl border border-emerald-200 shadow-sm">
+                    <div id="animal-svg-container" class="w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 flex items-center justify-center bg-teal-100/60 rounded-2xl border border-teal-300 p-2 shadow-inner">
+                        <!-- SVG injected here -->
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 id="question-text" class="text-xl sm:text-2xl font-black text-gray-800 mb-2 leading-snug">
+                            질문 내용이 들어갑니다.
+                        </h3>
+                        <p id="hint-text" class="text-sm sm:text-base text-teal-900 bg-teal-100/90 p-2.5 rounded-xl inline-block font-semibold">
+                            💡 힌트 내용
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Multiple Choice Container (3 Choices) -->
+                <div id="mc-options-container" class="grid grid-cols-1 gap-3 my-3">
+                    <!-- Dynamic 3 choice buttons -->
+                </div>
+
+                <!-- OX Options Container -->
+                <div id="ox-options-container" class="hidden grid grid-cols-2 gap-4 my-3">
+                    <button id="btn-o" onclick="selectOX(true)" class="btn-bounce bg-white hover:bg-blue-50 active:bg-blue-100 border-4 border-blue-400 rounded-3xl p-6 flex flex-col items-center justify-center shadow-lg transition">
+                        <span class="text-6xl sm:text-7xl font-black text-blue-600 mb-1">⭕</span>
+                        <span class="text-xl sm:text-2xl font-black text-blue-900">맞아요! (O)</span>
+                    </button>
+                    <button id="btn-x" onclick="selectOX(false)" class="btn-bounce bg-white hover:bg-rose-50 active:bg-rose-100 border-4 border-rose-400 rounded-3xl p-6 flex flex-col items-center justify-center shadow-lg transition">
+                        <span class="text-6xl sm:text-7xl font-black text-rose-600 mb-1">❌</span>
+                        <span class="text-xl sm:text-2xl font-black text-rose-900">틀려요! (X)</span>
+                    </button>
+                </div>
+
+                <!-- Explanation Result Box -->
+                <div id="explanation-box" class="hidden mt-4 p-4 rounded-2xl text-center sm:text-left font-bold text-base sm:text-lg border-2 shadow-sm">
+                </div>
+            </div>
+
+            <!-- Next Step Button -->
+            <div class="flex justify-end">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden btn-bounce bg-emerald-700 hover:bg-emerald-600 text-white font-black text-lg px-8 py-3.5 rounded-full shadow-lg flex items-center space-x-2 border-b-4 border-emerald-900">
+                    <span>다음 문제로</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="result-screen" class="hidden w-full bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-emerald-300 text-center">
+            
+            <div class="max-w-xl mx-auto bg-emerald-50/90 p-6 sm:p-8 rounded-3xl border-4 border-dashed border-emerald-400 relative shadow-inner">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg border-2 border-white">
+                    🏆
+                </div>
+
+                <p class="text-emerald-800 font-bold text-sm sm:text-base mt-2">강과 습지를 지키는 수호 어린이</p>
+                <h2 class="text-3xl sm:text-4xl font-black text-emerald-950 mt-1 mb-4 font-gaegu">
+                    습지 탐험대 수료증
+                </h2>
+
+                <div class="my-4 space-y-3 bg-white p-4 sm:p-6 rounded-2xl border border-emerald-200 shadow-sm">
+                    <p class="text-gray-700 sm:text-lg font-medium leading-relaxed">
+                        위 어린이는 탐험가 카드의 소중한 이야기를 듣고,<br>동물들이 위험에 처한 원인 퀴즈를 뛰어난 실력으로 모두 맞혔습니다!
+                    </p>
+                    <div class="py-3 border-t border-b border-emerald-100 flex justify-around items-center">
+                        <div>
+                            <span class="block text-xs text-gray-500 font-bold">퀴즈 맞힌 개수</span>
+                            <span id="final-score" class="text-2xl font-black text-emerald-600">5 / 5 문제</span>
+                        </div>
+                        <div class="h-8 w-px bg-emerald-200"></div>
+                        <div>
+                            <span class="block text-xs text-gray-500 font-bold">나의 탐험대 칭호</span>
+                            <span id="final-badge" class="text-2xl font-black text-teal-600">습지 수호 대장</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-3 my-4 text-3xl sm:text-4xl">
+                    <span title="두루미">🦩</span>
+                    <span title="양쯔강돌고래">🐬</span>
+                    <span title="투구새우">🦐</span>
+                    <span title="저어새">🕊️</span>
+                    <span title="아홀로틀">🦎</span>
+                </div>
+
+                <p class="text-xs text-emerald-800 font-bold">대한민국 강과 습지 멸종위기 동물 수호 본부 🌿📜</p>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="startQuiz()" class="btn-bounce bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg py-3.5 px-8 rounded-full shadow-lg border-b-4 border-emerald-800 flex items-center justify-center space-x-2">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>다시 풀어보기</span>
+                </button>
+                <button onclick="triggerConfetti()" class="btn-bounce bg-teal-600 hover:bg-teal-500 text-white font-bold text-lg py-3.5 px-8 rounded-full shadow-lg border-b-4 border-teal-800 flex items-center justify-center space-x-2">
+                    <span>🎉 축하 꽃가루 터뜨리기</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-4 text-xs sm:text-sm text-emerald-950/90 font-bold z-10 relative bg-emerald-900/10 backdrop-blur-sm">
+        <p>🌿 물을 오염시키지 않고, 쓰레기를 줄여 강과 습지의 생물들을 지켜주세요!</p>
+    </footer>
+
+    <script>
+        let soundEnabled = true;
+        const synth = window.speechSynthesis;
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('sound-icon');
+            const soundText = document.getElementById('sound-text');
+
+            if (soundEnabled) {
+                soundIcon.className = "fas fa-volume-up text-lg";
+                soundText.innerText = "소리 켜짐";
+            } else {
+                soundIcon.className = "fas fa-volume-mute text-lg";
+                soundText.innerText = "소리 꺼짐";
+                if (synth) synth.cancel();
+            }
+        }
+
+        function playEffectSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    const now = audioCtx.currentTime;
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'wrong') {
+                    const now = audioCtx.currentTime;
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(261.63, now);
+                    osc.frequency.setValueAtTime(220.00, now + 0.15);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            } catch(e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function speakText(text) {
+            if (!soundEnabled || !synth) return;
+            synth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            synth.speak(utterance);
+        }
+
+        /* SVG Illustrations for the 5 animals */
+        const riverAnimalSVGs = {
+            crane: `
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <path d="M 50 85 L 50 60 L 45 45 Q 40 30 52 22 T 62 18" fill="none" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+                    <ellipse cx="42" cy="50" rx="14" ry="10" fill="#f8fafc"/>
+                    <circle cx="62" cy="18" r="4" fill="#ef4444"/>
+                    <path d="M 64 20 L 78 22 L 64 23 Z" fill="#b45309"/>
+                    <line x1="45" y1="60" x2="42" y2="90" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="52" y1="60" x2="55" y2="90" stroke="#334155" stroke-width="2.5"/>
+                    <circle cx="60" cy="17" r="1" fill="#000"/>
+                </svg>
+            `,
+            dolphin: `
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <path d="M 20 60 Q 30 25 65 30 Q 82 35 78 50 Q 60 70 20 60 Z" fill="#64748b"/>
+                    <path d="M 78 50 Q 88 55 92 48 Q 88 60 82 62 Z" fill="#475569"/>
+                    <circle cx="68" cy="38" r="2.5" fill="#000"/>
+                    <path d="M 38 48 Q 45 55 35 62 Q 32 55 38 48 Z" fill="#475569"/>
+                    <path d="M 62 44 Q 68 47 62 48" stroke="#334155" stroke-width="1.5" fill="none"/>
+                </svg>
+            `,
+            tadpoleShrimp: `
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <ellipse cx="50" cy="38" rx="22" ry="26" fill="#65a30d"/>
+                    <ellipse cx="50" cy="38" rx="18" ry="22" fill="#84cc16"/>
+                    <circle cx="44" cy="22" r="2" fill="#1e293b"/>
+                    <circle cx="56" cy="22" r="2" fill="#1e293b"/>
+                    <path d="M 50 62 L 47 85 M 50 62 L 53 85" stroke="#4d7c0f" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="38" y1="20" x2="22" y2="10" stroke="#84cc16" stroke-width="1.5"/>
+                    <line x1="62" y1="20" x2="78" y2="10" stroke="#84cc16" stroke-width="1.5"/>
+                </svg>
+            `,
+            spoonbill: `
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <path d="M 38 75 Q 35 50 48 35 Q 52 20 60 22" fill="none" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/>
+                    <ellipse cx="36" cy="65" rx="16" ry="12" fill="#ffffff"/>
+                    <!-- Spoon-shaped Beak -->
+                    <path d="M 60 22 Q 72 20 82 25 C 88 28 86 34 80 32 L 60 26 Z" fill="#1e293b"/>
+                    <circle cx="58" cy="20" r="1.5" fill="#000"/>
+                    <line x1="32" y1="75" x2="30" y2="92" stroke="#1e293b" stroke-width="2.5"/>
+                    <line x1="40" y1="75" x2="42" y2="92" stroke="#1e293b" stroke-width="2.5"/>
+                </svg>
+            `,
+            axolotl: `
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <ellipse cx="50" cy="55" rx="22" ry="26" fill="#fbcfe8"/>
+                    <circle cx="50" cy="38" r="18" fill="#fce7f3"/>
+                    <!-- Pink External Gills -->
+                    <path d="M 32 35 C 20 28 20 38 32 40" fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 32 28 C 18 18 18 28 32 32" fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 68 35 C 80 28 80 38 68 40" fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 68 28 C 82 18 82 28 68 32" fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Face -->
+                    <circle cx="43" cy="36" r="2.5" fill="#1e1b4b"/>
+                    <circle cx="57" cy="36" r="2.5" fill="#1e1b4b"/>
+                    <path d="M 45 43 Q 50 47 55 43" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            `
+        };
+
+        // Quiz Data based on the provided images
+        const riverQuizData = [
+            {
+                id: 1,
+                type: "mc", // Multiple Choice (3 choices)
+                explorer: "김서연 탐험가",
+                animalName: "두루미",
+                svgKey: "crane",
+                question: "김서연 탐험가의 카드에 따르면, 두루미가 멸종위기 동물이 된 가장 큰 이유는 무엇일까요?",
+                hint: "💡 힌트: 두루미가 살아가는 장소와 관련이 있어요!",
+                choices: [
+                    "1. 날씨가 너무 추워서 얼어붙어서",
+                    "2. 생활하는 습지와 먹이가 줄어들어서",
+                    "3. 사람이 너무 예뻐해서 집에 가져가서"
+                ],
+                correctIndex: 1,
+                explanation: "정답입니다! ⭕ 두루미는 생활하는 '습지와 먹이가 줄어들어서' 멸종위기가 되었답니다."
+            },
+            {
+                id: 2,
+                type: "ox", // OX Quiz
+                explorer: "남기원 탐험가",
+                animalName: "양쯔강 돌고래",
+                svgKey: "dolphin",
+                question: "양쯔강 돌고래는 강과 하천이 오염되고, 배와 사람들 때문에 살 곳이 줄어들어 멸종위기가 되었을까요?",
+                hint: "💡 힌트: 물속 쓰레기와 잡거나 괴롭히는 행동 때문이에요!",
+                isTrue: true,
+                explanation: "맞아요! ⭕ 강 오염, 살 곳 감소, 배와 사람들, 그리고 돌고래를 잡거나 물속에 버린 쓰레기 때문에 위험해졌어요."
+            },
+            {
+                id: 3,
+                type: "mc", // Multiple Choice (3 choices)
+                explorer: "김준 탐험가",
+                animalName: "투구새우",
+                svgKey: "tadpoleShrimp",
+                question: "김준 탐험가 카드에서 투구새우의 개체 수가 감소하고 살 곳이 줄어든 원인으로 꼽은 것은 무엇일까요?",
+                hint: "💡 힌트: 농사지을 때 사용하는 화학 물질이에요!",
+                choices: [
+                    "1. 농약과 화학비료를 많이 사용해서",
+                    "2. 물고기들이 투구새우를 다 먹어버려서",
+                    "3. 비가 너무 많이 내려서 논이 사라져서"
+                ],
+                correctIndex: 0,
+                explanation: "정답입니다! ⭕ 농약과 화학비료를 많이 사용하면서 살 곳이 줄어들고 수가 감소했어요."
+            },
+            {
+                id: 4,
+                type: "ox", // OX Quiz
+                explorer: "성현수 탐험가",
+                animalName: "저어새",
+                svgKey: "spoonbill",
+                question: "저어새는 사람이 갯벌과 습지를 마구 개발하고 오염시켜서 살기 어려워졌을까요?",
+                hint: "💡 힌트: 저어새가 좋아하는 갯벌 환경을 생각해 보세요!",
+                isTrue: true,
+                explanation: "맞아요! ⭕ 저어새가 좋아하는 갯벌과 습지를 인간이 개발하고 오염시켜서 살 곳을 잃고 위험해졌어요."
+            },
+            {
+                id: 5,
+                type: "mc", // Multiple Choice (3 choices)
+                explorer: "조유나 탐험가",
+                animalName: "아홀로틀",
+                svgKey: "axolotl",
+                question: "조유나 탐험가 카드에서 귀여운 아홀로틀이 살아가는 호수가 줄어들고 위험해진 이유는 무엇일까요?",
+                hint: "💡 힌트: 도시가 커지고 물이 오염된 것과 관련 있어요!",
+                choices: [
+                    "1. 다른 물고기와 싸움에서 져서",
+                    "2. 도시화와 사람이 많아지며 물이 오염되어서",
+                    "3. 밤에 잠을 자지 않고 놀기만 해서"
+                ],
+                correctIndex: 1,
+                explanation: "정답입니다! ⭕ 도시화와 사람이 많아지면서 호수가 줄어들고, 오염된 도시의 물 때문에 살기 어려워졌어요."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function showScreen(screenId) {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            document.getElementById(screenId).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            showScreen('quiz-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const data = riverQuizData[currentQuestionIndex];
+
+            // Progress Header Updates
+            document.getElementById('quiz-progress-text').innerText = `문제 ${currentQuestionIndex + 1} / ${riverQuizData.length}`;
+            document.getElementById('score-text').innerText = `내 점수: ${score * 20}점`;
+            document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / riverQuizData.length) * 100}%`;
+
+            // Quiz Header Badge
+            document.getElementById('explorer-icon').innerText = "🧭";
+            document.getElementById('explorer-title').innerText = `${data.explorer}: ${data.animalName}`;
+            
+            const typeTag = document.getElementById('quiz-type-tag');
+            if (data.type === 'mc') {
+                typeTag.innerText = "3지선다";
+                typeTag.className = "ml-2 bg-amber-400 text-amber-950 text-xs px-2.5 py-0.5 rounded-full font-extrabold";
+            } else {
+                typeTag.innerText = "O / X 퀴즈";
+                typeTag.className = "ml-2 bg-sky-400 text-sky-950 text-xs px-2.5 py-0.5 rounded-full font-extrabold";
+            }
+
+            document.getElementById('question-text').innerText = data.question;
+            document.getElementById('hint-text').innerText = data.hint;
+            document.getElementById('animal-svg-container').innerHTML = riverAnimalSVGs[data.svgKey] || '';
+
+            const mcContainer = document.getElementById('mc-options-container');
+            const oxContainer = document.getElementById('ox-options-container');
+
+            if (data.type === 'mc') {
+                mcContainer.classList.remove('hidden');
+                oxContainer.classList.add('hidden');
+
+                mcContainer.innerHTML = '';
+                data.choices.forEach((choiceText, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = "mc-opt-btn btn-bounce w-full text-left bg-white hover:bg-emerald-50 active:bg-emerald-100 border-2 border-emerald-300 rounded-2xl p-4 text-base sm:text-lg font-bold text-gray-800 shadow-sm transition flex items-center justify-between";
+                    btn.innerHTML = `<span>${choiceText}</span> <i class="fas fa-chevron-right text-emerald-400 text-sm"></i>`;
+                    btn.onclick = () => selectMC(index);
+                    mcContainer.appendChild(btn);
+                });
+            } else {
+                mcContainer.classList.add('hidden');
+                oxContainer.classList.remove('hidden');
+
+                const btnO = document.getElementById('btn-o');
+                const btnX = document.getElementById('btn-x');
+                btnO.disabled = false;
+                btnX.disabled = false;
+                btnO.className = "btn-bounce bg-white hover:bg-blue-50 active:bg-blue-100 border-4 border-blue-400 rounded-3xl p-6 flex flex-col items-center justify-center shadow-lg transition opacity-100";
+                btnX.className = "btn-bounce bg-white hover:bg-rose-50 active:bg-rose-100 border-4 border-rose-400 rounded-3xl p-6 flex flex-col items-center justify-center shadow-lg transition opacity-100";
+            }
+
+            // Hide Explanation & Next Button
+            const expBox = document.getElementById('explanation-box');
+            expBox.classList.add('hidden');
+            expBox.className = "hidden mt-4 p-4 rounded-2xl text-center sm:text-left font-bold text-base sm:text-lg border-2 shadow-sm";
+
+            document.getElementById('next-btn').classList.add('hidden');
+
+            setTimeout(() => {
+                readQuestionTTS();
+            }, 300);
+        }
+
+        function readQuestionTTS() {
+            const data = riverQuizData[currentQuestionIndex];
+            if (data.type === 'mc') {
+                speakText(`${data.explorer}의 문제! ${data.question} 보기 세 개 중 정답을 골라보세요!`);
+            } else {
+                speakText(`${data.explorer}의 문제! ${data.question} 맞으면 동그라미, 틀리면 표를 눌러주세요!`);
+            }
+        }
+
+        function selectMC(choiceIndex) {
+            const data = riverQuizData[currentQuestionIndex];
+            const expBox = document.getElementById('explanation-box');
+            const btns = document.querySelectorAll('.mc-opt-btn');
+
+            btns.forEach(btn => btn.disabled = true);
+
+            const isCorrect = (choiceIndex === data.correctIndex);
+            expBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                score++;
+                playEffectSound('correct');
+                btns[choiceIndex].classList.replace('border-emerald-300', 'border-emerald-600');
+                btns[choiceIndex].classList.add('bg-emerald-100', 'text-emerald-950');
+
+                expBox.classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-950');
+                expBox.innerHTML = `🎉 <strong>정답입니다!</strong><br>${data.explanation}`;
+                speakText(`정답입니다! ${data.explanation}`);
+                triggerSmallConfetti();
+            } else {
+                playEffectSound('wrong');
+                btns[choiceIndex].classList.replace('border-emerald-300', 'border-amber-500');
+                btns[choiceIndex].classList.add('bg-amber-100', 'text-amber-950');
+
+                // Highlight correct choice
+                btns[data.correctIndex].classList.replace('border-emerald-300', 'border-emerald-500');
+                btns[data.correctIndex].classList.add('bg-emerald-50');
+
+                expBox.classList.add('bg-amber-100', 'border-amber-400', 'text-amber-950');
+                expBox.innerHTML = `💡 <strong>아쉬워요! 정답은 ${data.correctIndex + 1}번입니다.</strong><br>${data.explanation}`;
+                speakText(`아쉬워요! 정답은 ${data.correctIndex + 1}번입니다. ${data.explanation}`);
+            }
+
+            document.getElementById('score-text').innerText = `내 점수: ${score * 20}점`;
+            revealNextButton();
+        }
+
+        function selectOX(userChoice) {
+            const data = riverQuizData[currentQuestionIndex];
+            const expBox = document.getElementById('explanation-box');
+
+            const btnO = document.getElementById('btn-o');
+            const btnX = document.getElementById('btn-x');
+            btnO.disabled = true;
+            btnX.disabled = true;
+
+            const isCorrect = (userChoice === data.isTrue);
+
+            if (userChoice) {
+                btnX.classList.add('opacity-40');
+            } else {
+                btnO.classList.add('opacity-40');
+            }
+
+            expBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                score++;
+                playEffectSound('correct');
+
+                if (userChoice) {
+                    btnO.classList.replace('border-blue-400', 'border-emerald-500');
+                    btnO.classList.add('bg-emerald-50');
+                } else {
+                    btnX.classList.replace('border-rose-400', 'border-emerald-500');
+                    btnX.classList.add('bg-emerald-50');
+                }
+
+                expBox.classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-950');
+                expBox.innerHTML = `🎉 <strong>정답이에요!</strong><br>${data.explanation}`;
+                speakText(`정답입니다! ${data.explanation}`);
+                triggerSmallConfetti();
+            } else {
+                playEffectSound('wrong');
+
+                if (userChoice) {
+                    btnO.classList.replace('border-blue-400', 'border-amber-500');
+                    btnO.classList.add('bg-amber-50');
+                } else {
+                    btnX.classList.replace('border-rose-400', 'border-amber-500');
+                    btnX.classList.add('bg-amber-50');
+                }
+
+                expBox.classList.add('bg-amber-100', 'border-amber-400', 'text-amber-950');
+                expBox.innerHTML = `💡 <strong>아쉬워요! 정답은 ${data.isTrue ? '⭕ 맞아요' : '❌ 틀려요'}입니다.</strong><br>${data.explanation}`;
+                speakText(`아쉬워요! 정답은 ${data.isTrue ? '맞아요' : '틀려요'}입니다. ${data.explanation}`);
+            }
+
+            document.getElementById('score-text').innerText = `내 점수: ${score * 20}점`;
+            revealNextButton();
+        }
+
+        function revealNextButton() {
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.classList.remove('hidden');
+            if (currentQuestionIndex === riverQuizData.length - 1) {
+                nextBtn.querySelector('span').innerText = "수료증 받으러 가기 🏆";
+            } else {
+                nextBtn.querySelector('span').innerText = "다음 문제로 ➡️";
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < riverQuizData.length) {
+                loadQuestion();
+            } else {
+                showResultScreen();
+            }
+        }
+
+        function showResultScreen() {
+            showScreen('result-screen');
+            
+            const totalQuestions = riverQuizData.length;
+            document.getElementById('final-score').innerText = `${score} / ${totalQuestions} 문제`;
+
+            let badgeTitle = "멋진 습지 탐험가";
+            if (score === 5) badgeTitle = "👑 최고의 습지 수호 대장";
+            else if (score >= 3) badgeTitle = "⭐ 용감한 습지 파수꾼";
+            else badgeTitle = "🌿 귀여운 습지 수호 새싹";
+
+            document.getElementById('final-badge').innerText = badgeTitle;
+
+            triggerConfetti();
+            speakText(`축하합니다! ${totalQuestions}문제 중 ${score}문제를 맞혀 멋진 습지 수호 탐험대원이 되었습니다!`);
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 85,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function triggerSmallConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 40,
+                    spread: 50,
+                    origin: { y: 0.7 }
+                });
+            }
+        }
+
+        function createFloatingLeaves() {
+            const container = document.getElementById('leaf-container');
+            const leafEmojis = ['🌿', '🍃', '🌱', '💧'];
+            for (let i = 0; i < 15; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'floating-leaf text-2xl';
+                leaf.innerText = leafEmojis[Math.floor(Math.random() * leafEmojis.length)];
+                leaf.style.left = `${Math.random() * 100}%`;
+                leaf.style.animationDuration = `${Math.random() * 6 + 6}s`;
+                leaf.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(leaf);
+            }
+        }
+
+        window.onload = function() {
+            createFloatingLeaves();
+            console.log("River & Wetland Quiz App Ready!");
+        };
+    </script>
+</body>
+</html>
